@@ -3,31 +3,25 @@ use anchor_lang::prelude::*;
 pub mod state;
 pub mod instructions;
 pub mod errors;
+pub mod constants;
 
 use instructions::*;
-declare_id!("3cmgKnfjYUh7K9o2VWajfiNLTNoFYqtkNkMcRoHptGVJ");
+
+declare_id!("YourProgramIDHere");
 
 #[program]
 pub mod cpi_swap_program {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        instructions::initialize::initialize(ctx)
+    pub fn swap_ray(ctx: Context<SwapRaydium>, amount_in: u64, min_amount_out: u64) -> Result<()> {
+        instructions::swap_ray::handler(ctx, amount_in, min_amount_out)
     }
 
-    pub fn raydium_swap(ctx: Context<RaydiumSwap>, amount_in: u64) -> Result<()> {
-        instructions::raydium_swap::raydium_swap(ctx, amount_in)
+    pub fn swap_whirlpools(ctx: Context<SwapWhirlpools>, amount_in: u64, min_amount_out: u64) -> Result<()> {
+        instructions::swap_whirlpools::handler(ctx, amount_in, min_amount_out)
     }
 
-    pub fn whirlpool_swap(ctx: Context<WhirlpoolSwap>, amount_in: u64) -> Result<()> {
-        instructions::whirlpool_swap::whirlpool_swap(ctx, amount_in)
-    }
-
-    pub fn add_to_whitelist(ctx: Context<ModifyWhitelist>, address: Pubkey) -> Result<()> {
-        instructions::add_to_whitelist::add_to_whitelist(ctx, address)
-    }
-
-    pub fn remove_from_whitelist(ctx: Context<ModifyWhitelist>, address: Pubkey) -> Result<()> {
-        instructions::remove_from_whitelist::remove_from_whitelist(ctx, address)
+    pub fn manage_whitelist(ctx: Context<ManageWhitelist>, user: Pubkey, add: bool) -> Result<()> {
+        instructions::manage_whitelist::handler(ctx, user, add)
     }
 }

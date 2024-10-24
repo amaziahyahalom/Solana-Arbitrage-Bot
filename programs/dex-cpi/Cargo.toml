@@ -1,21 +1,22 @@
 [package]
-name = "dex-cpi"
+name = "cpi-swap-program"
 version = "0.1.0"
-description = "Created with Anchor"
+description = "CPI Swap Program with Raydium and Whirlpools integration"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "dex_cpi"
+name = "cpi_swap_program"
 
 [features]
-default = []
-cpi = ["no-entrypoint"]
 no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
-idl-build = ["anchor-lang/idl-build"]
+cpi = ["no-entrypoint"]
+default = []
 
 [dependencies]
-anchor-lang = "0.30.1"
-anchor_spl = "0.30.1"
+anchor-lang = "0.28.0"
+anchor-spl = "0.28.0"
+raydium = { git = "https://github.com/raydium-io/raydium-contract", features = ["cpi"] }
+whirlpools = { git = "https://github.com/orca-so/whirlpools", features = ["cpi"] }
