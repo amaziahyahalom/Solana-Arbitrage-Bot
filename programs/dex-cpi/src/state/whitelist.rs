@@ -6,6 +6,7 @@ use crate::errors::ErrorCode;
 pub struct Whitelist {
     pub authority: Pubkey,
     pub users: Vec<Pubkey>,
+    pub paused: bool,
 }
 
 impl Whitelist {
@@ -24,5 +25,9 @@ impl Whitelist {
     pub fn remove_user(&mut self, user: Pubkey) -> Result<()> {
         self.users.retain(|&u| u != user);
         Ok(())
+    }
+
+    pub fn set_paused(&mut self, paused: bool) {
+        self.paused = paused;
     }
 }
