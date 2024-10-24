@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use crate::constants::MAX_WHITELIST_SIZE;
+use crate::errors::ErrorCode;
 
 #[account]
 pub struct Whitelist {
