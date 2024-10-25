@@ -1,5 +1,9 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Token, TokenAccount};
+use anchor_lang::solana_program::{
+    instruction::Instruction,
+    program::invoke,
+};
+use anchor_spl::token::{Token, TokenAccount};
 use crate::state::whitelist::Whitelist;
 use crate::errors::ErrorCode;
 
@@ -12,28 +16,54 @@ pub struct SwapRaydium<'info> {
     #[account(mut)]
     pub destination: Account<'info, TokenAccount>,
     pub token_program: Program<'info, Token>,
-    pub raydium_program: Program<'info, raydium::program::Raydium>,
-    /// CHECK: This account is checked in the Raydium program
+    /// CHECK: This is the Raydium program ID
+    pub raydium_program: AccountInfo<'info>,
+    /// CHECK: These are the pool accounts required by Raydium
     #[account(mut)]
     pub pool_accounts: AccountInfo<'info>,
     pub whitelist: Account<'info, Whitelist>,
 }
 
-pub fn swap_ray(ctx: Context<SwapRaydium>, amount_in: u64, min_amount_out: u64) -> Result<()> {
+pub fn handler(ctx: Context<SwapRaydium>, amount_in: u64, min_amount_out: u64) -> Result<()> {
     let user = &ctx.accounts.user;
     let whitelist = &ctx.accounts.whitelist;
 
     require!(whitelist.is_whitelisted(user.key()), ErrorCode::NotWhitelisted);
 
-    let cpi_accounts = raydium::cpi::accounts::Swap {
-        token_program: ctx.accounts.token_program.to_account_info(),
-        user: ctx.accounts.user.to_account_info(),
-        source: ctx.accounts.source.to_account_info(),
-        destination: ctx.accounts.destination.to_account_info(),
-        pool_accounts: ctx.accounts.pool_accounts.to_account_info(),
+    // Construct the instruction for Raydium swap
+    let ix = Instruction {
+        program_id: ctx.accounts.raydium_program.key(),
+        accounts: vec![
+            AccountMeta::new(ctx.accounts.user.key(), true),
+            AccountMeta::new(ctx.accounts.source.key(), false),
+            AccountMeta::new(ctx.accounts.destination.key(), false),
+            AccountMeta::new_readonly(ctx.accounts.token_program.key(), false),
+            AccountMeta::new(ctx.accounts.pool_accounts.key(), false),
+            // Add other necessary account metas for Raydium swap
+        ],
+        data: raydium_swap_instruction(amount_in, min_amount_out),
     };
-    let cpi_ctx = CpiContext::new(ctx.accounts.raydium_program.to_account_info(), cpi_accounts);
 
-    raydium::cpi::swap(cpi_ctx, amount_in, min_amount_out)?;
+    // Invoke the Raydium swap instruction
+    invoke(
+        &ix,
+        &[
+            ctx.accounts.user.to_account_info(),
+            ctx.accounts.source.to_account_info(),
+            ctx.accounts.destination.to_account_info(),
+            ctx.accounts.token_program.to_account_info(),
+            ctx.accounts.pool_accounts.to_account_info(),
+            // Add other necessary account infos
+        ],
+    )?;
+
     Ok(())
+}
+
+// This function should construct the instruction data for Raydium swap
+// You'll need to implement this based on Raydium's instruction format
+fn raydium_swap_instruction(amount_in: u64, min_amount_out: u64) -> Vec<u8> {
+    // Implement the instruction data creation for Raydium swap
+    // This will depend on Raydium's specific instruction format
+    unimplemented!("Implement Raydium swap instruction data creation")
 }
