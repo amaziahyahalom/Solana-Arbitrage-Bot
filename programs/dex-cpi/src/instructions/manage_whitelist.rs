@@ -12,7 +12,7 @@ pub struct ManageWhitelist<'info> {
     pub authority: Signer<'info>,
 }
 
-pub fn handler(ctx: Context<ManageWhitelist>, user: Pubkey, add: bool) -> Result<()> {
+pub fn manage_whitelist(ctx: Context<ManageWhitelist>, user: Pubkey, add: bool) -> Result<()> {
     let whitelist = &mut ctx.accounts.whitelist;
 
     if add {
