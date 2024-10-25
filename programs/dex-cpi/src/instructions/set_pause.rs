@@ -10,7 +10,7 @@ pub struct SetPause<'info> {
     pub whitelist: Account<'info, Whitelist>,
 }
 
-pub fn handler(ctx: Context<SetPause>, paused: bool) -> Result<()> {
+pub fn set_pause(ctx: Context<SetPause>, paused: bool) -> Result<()> {
     let whitelist = &mut ctx.accounts.whitelist;
     whitelist.set_paused(paused);
     Ok(())

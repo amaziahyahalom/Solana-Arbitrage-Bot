@@ -24,7 +24,7 @@ pub struct SwapRaydium<'info> {
     pub whitelist: Account<'info, Whitelist>,
 }
 
-pub fn handler(ctx: Context<SwapRaydium>, amount_in: u64, min_amount_out: u64) -> Result<()> {
+pub fn swap_ray(ctx: Context<SwapRaydium>, amount_in: u64, min_amount_out: u64) -> Result<()> {
     let user = &ctx.accounts.user;
     let whitelist = &ctx.accounts.whitelist;
 
@@ -63,7 +63,10 @@ pub fn handler(ctx: Context<SwapRaydium>, amount_in: u64, min_amount_out: u64) -
 // This function should construct the instruction data for Raydium swap
 // You'll need to implement this based on Raydium's instruction format
 fn raydium_swap_instruction(amount_in: u64, min_amount_out: u64) -> Vec<u8> {
-    // Implement the instruction data creation for Raydium swap
-    // This will depend on Raydium's specific instruction format
-    unimplemented!("Implement Raydium swap instruction data creation")
+    let mut instruction_data = Vec::new();
+    instruction_data.extend_from_slice(&(0u8).to_le_bytes()); // Instruction discriminator for swap
+    instruction_data.extend_from_slice(&amount_in.to_le_bytes());
+    instruction_data.extend_from_slice(&min_amount_out.to_le_bytes());
+    // Add any other necessary parameters
+    instruction_data
 }
