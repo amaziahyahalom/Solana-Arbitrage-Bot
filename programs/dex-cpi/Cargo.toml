@@ -19,4 +19,6 @@ default = []
 anchor-lang = "0.28.0"
 anchor-spl = "0.28.0"
 solana-program = "1.16.0"
-whirlpools = { git = "https://github.com/orca-so/whirlpools", features = ["cpi"] }
+
+raydium = { git = "https://github.com/raydium-io/raydium-contract-instructions", features = ["cpi"] }
+whirlpool = { git = "https://github.com/orca-so/whirlpools", features = ["cpi"] }
