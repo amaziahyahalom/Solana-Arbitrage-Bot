@@ -5,18 +5,24 @@ use crate::errors::ErrorCode;
 #[derive(Accounts)]
 pub struct ManageWhitelist<'info> {
     #[account(mut)]
-    pub authority: Signer<'info>,
-    #[account(mut, has_one = authority @ ErrorCode::Unauthorized)]
     pub whitelist: Account<'info, Whitelist>,
+    #[account(
+        constraint = authority.key() == whitelist.authority @ ErrorCode::UnauthorizedAccess
+    )]
+    pub authority: Signer<'info>,
 }
 
 pub fn handler(ctx: Context<ManageWhitelist>, user: Pubkey, add: bool) -> Result<()> {
     let whitelist = &mut ctx.accounts.whitelist;
 
     if add {
-        whitelist.add_user(user)?;
+        if whitelist.users.contains(&user) {
+            return Err(ErrorCode::UserAlreadyWhitelisted.into());
+        }
+        whitelist.users.push(user);
     } else {
-        whitelist.remove_user(user)?;
+        whitelist.users.retain(|&x| x != user);
     }
+
     Ok(())
 }
