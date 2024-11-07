@@ -17,3 +17,15 @@ npm install @project-serum/anchor @solana/web3.js @solana/spl-token chai
  https://docs.raydium.io/raydium/protocol/developers/addresses
 
  https://orca-so.gitbook.io/orca-developer-portal/whirlpools/interacting-with-the-protocol/orca-whirlpools-parameters
+
+ https://github.com/raydium-io/raydium-amm/blob/master/program/Cargo.toml
+
+ https://github.com/raydium-io/raydium-cpi-example
+
+ https://github.com/raydium-io/raydium-docs/tree/master/dev-resources
+
+ https://github.com/microgift/meteora-cpi
+
+ https://github.com/orca-so/whirlpool-cpi-sample/blob/main/anchor-0.29.0/programs/whirlpool-cpi-sample/
+ 
+ https://github.com/MeteoraAg/cpi-examples
