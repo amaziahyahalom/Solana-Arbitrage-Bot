@@ -5,6 +5,7 @@
 ### 2. swap_whirlpool as the swap function for Whirlpools DEX
 ### 3. manage_whitelist as the function to add/remove whitelist addresses that can access all functions in this program. 
 
+![arbitrage diagram for pool graph](https://github.com/user-attachments/assets/0cf0a1ee-301a-420b-a623-92da3806ecfd)
 
 
 
