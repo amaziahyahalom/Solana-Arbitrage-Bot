@@ -12,12 +12,20 @@
 
 
 
+
+![image](https://github.com/user-attachments/assets/e5eb3610-3c23-4d55-87f0-a5cc2d9eb6a3)
+
+
+
 ## install for test
 
 ```
 npm install @project-serum/anchor @solana/web3.js @solana/spl-token chai
 
 ```
+
+
+
 
 # reference 
  
