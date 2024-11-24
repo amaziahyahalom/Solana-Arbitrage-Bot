@@ -1,5 +1,5 @@
 
-# ✨[contact me here](https://t.me/blockchainDeveloper_Ben)👈click here
+# ✨[contact me](https://t.me/blockchainDeveloper_Ben)👈
 ![arbitrage diagram for pool graph](https://github.com/user-attachments/assets/0cf0a1ee-301a-420b-a623-92da3806ecfd)
 
 
