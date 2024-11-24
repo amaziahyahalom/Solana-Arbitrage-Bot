@@ -1,10 +1,5 @@
 
-# Main project is on private: # ✨[contact me here](https://t.me/blockchainDeveloper_Ben)👈click here
-
-### 1. swap_ray as the swap function for Raydium DEX
-### 2. swap_whirlpool as the swap function for Whirlpools DEX
-### 3. manage_whitelist as the function to add/remove whitelist addresses that can access all functions in this program. 
-
+# ✨[contact me here](https://t.me/blockchainDeveloper_Ben)👈click here
 ![arbitrage diagram for pool graph](https://github.com/user-attachments/assets/0cf0a1ee-301a-420b-a623-92da3806ecfd)
 
 
