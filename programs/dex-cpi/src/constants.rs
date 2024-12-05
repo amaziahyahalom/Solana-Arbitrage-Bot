@@ -1,1 +1,0 @@
-pub const MAX_WHITELIST_SIZE: usize = 1000; // Adjust this value as needed
