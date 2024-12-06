@@ -1,226 +1,200 @@
 // File: src/lib.rs
 
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Token, TokenAccount};
-use anchor_lang::solana_program::instruction::Instruction;
+use anchor_spl::token::{Token, TokenAccount};
 
-declare_id!("CRQXfRGq3wTkjt7JkqhojPLiKLYLjHPGLebnfiiQB46T");
-
-pub mod error;
+pub mod swaps;
 pub mod state;
 pub mod ix_data;
-pub mod swaps;
 
-use error::ErrorCode;
-use state::SwapState;
-use ix_data::SwapData;
-pub use swaps::*;
+use crate::swaps::{
+    meteora::*,
+    raydium::*,
+    orca::*,
+    jupiter::*,
+};
+
+declare_id!("ArbitrageProgram11111111111111111111111111111111");
 
 #[program]
-pub mod arbitrage_bot {
+pub mod arbitrage {
     use super::*;
 
-    pub fn init_program(ctx: Context<InitSwapState>, input_token: Pubkey) -> Result<()> {
+    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
         let swap_state = &mut ctx.accounts.swap_state;
-        swap_state.swap_input = 0;
-        swap_state.is_valid = false;  
-        swap_state.input_token = input_token;
-        swap_state.current_token = input_token;
+        swap_state.owner = ctx.accounts.owner.key();
+        swap_state.profit_threshold = 5000; // 0.5% in bps
+        swap_state.active_routes = 0;
         Ok(())
     }
 
-    pub fn start_swap(ctx: Context<TokenAndSwapState>, swap_input: u64) -> Result<()> {
-        let swap_state = &mut ctx.accounts.swap_state;
-        swap_state.start_balance = ctx.accounts.src.amount;
-        swap_state.swap_input = swap_input;
-        swap_state.is_valid = true;
-        Ok(())
-    }
+    // Two-Hop Arbitrage (Meteora -> Raydium)
+    pub fn execute_two_hop_arbitrage(
+        ctx: Context<TwoHopArbitrage>,
+        amount_in: u64,
+        minimum_intermediate_amount: u64,
+        minimum_final_amount: u64,
+    ) -> Result<()> {
+        // First swap on Meteora
+        _meteora_swap(
+            &ctx.accounts.meteora_accounts,
+            amount_in,
+            minimum_intermediate_amount,
+        )?;
 
-    pub fn execute_arbitrage(ctx: Context<ExecuteArbitrage>, path: Vec<ArbitrageStep>) -> Result<()> {
-        let swap_state = &mut ctx.accounts.swap_state;
-        
-        // Execute each step in the arbitrage path
-        for step in path {
-            match step {
-                ArbitrageStep::Orca(amount_in, minimum_amount_out) => {
-                    orca_swap(ctx.accounts.orca.clone(), amount_in, minimum_amount_out)?;
-                },
-                ArbitrageStep::Raydium(amount_in, minimum_amount_out) => {
-                    raydium_swap(ctx.accounts.raydium.clone(), amount_in, minimum_amount_out)?;
-                },
-                ArbitrageStep::Meteora(amount_in, minimum_amount_out) => {
-                    meteora_swap(ctx.accounts.meteora.clone(), amount_in, minimum_amount_out)?;
-                },
-                ArbitrageStep::Phoenix(amount_in, minimum_amount_out) => {
-                    phoenix_swap(ctx.accounts.phoenix.clone(), amount_in, minimum_amount_out)?;
-                },
-                ArbitrageStep::Lifinity(amount_in, minimum_amount_out) => {
-                    lifinity_swap(ctx.accounts.lifinity.clone(), amount_in, minimum_amount_out)?;
-                },
-                ArbitrageStep::Jupiter(amount_in, minimum_amount_out) => {
-                    jupiter_swap(ctx.accounts.jupiter.clone(), amount_in, minimum_amount_out)?;
-                },
-            }
-            
-            swap_state.current_token = step.get_output_token();
-        }
-        
-        Ok(())
-    }
+        // Second swap on Raydium
+        _raydium_swap(
+            &ctx.accounts.raydium_accounts,
+            minimum_intermediate_amount,
+            minimum_final_amount,
+        )?;
 
-    pub fn profit_or_revert(ctx: Context<TokenAndSwapState>, path: Vec<ArbitrageStep>) -> Result<()> {
-        let swap_state = &mut ctx.accounts.swap_state;
-        swap_state.is_valid = false;
-    
-        let init_balance = swap_state.start_balance;
-        let final_balance = ctx.accounts.src.amount;
-        
-        let total_fees: u64 = path.iter()
-            .map(|step| calculate_fees(step, init_balance))
-            .sum();
-        
-        msg!(
-            "old = {:?}; new = {:?}; diff = {:?}; fees = {:?}", 
-            init_balance, 
-            final_balance, 
-            final_balance.saturating_sub(init_balance), 
-            total_fees
-        );
+        // Verify profit
+        let profit = minimum_final_amount.checked_sub(amount_in)
+            .ok_or(ErrorCode::ArithmeticError)?;
         
         require!(
-            final_balance > init_balance.saturating_add(total_fees), 
-            ErrorCode::NoProfit
+            profit >= ctx.accounts.swap_state.profit_threshold,
+            ErrorCode::InsufficientProfit
         );
-    
+
         Ok(())
     }
 
-    // DEX-specific swap implementations
-    pub fn orca_swap<'info>(
-        ctx: Context<'_, '_, '_, 'info, OrcaSwap<'info>>,
+    // Triangle Arbitrage (Meteora -> Meteora -> Raydium)
+    pub fn execute_triangle_arbitrage(
+        ctx: Context<TriangleArbitrage>,
         amount_in: u64,
-        minimum_amount_out: u64
+        minimum_amount_1: u64,
+        minimum_amount_2: u64,
+        minimum_final_amount: u64,
     ) -> Result<()> {
-        let amount_in = prepare_swap(&ctx.accounts.swap_state)?;
-        _orca_swap(&ctx, amount_in, minimum_amount_out)?;
-        end_swap(&mut ctx.accounts.swap_state, &mut ctx.accounts.user_dst)?;
+        // First Meteora swap
+        _meteora_swap(
+            &ctx.accounts.meteora_accounts_1,
+            amount_in,
+            minimum_amount_1,
+        )?;
+
+        // Second Meteora swap
+        _meteora_swap(
+            &ctx.accounts.meteora_accounts_2,
+            minimum_amount_1,
+            minimum_amount_2,
+        )?;
+
+        // Final Raydium swap
+        _raydium_swap(
+            &ctx.accounts.raydium_accounts,
+            minimum_amount_2,
+            minimum_final_amount,
+        )?;
+
+        // Verify profit
+        let profit = minimum_final_amount.checked_sub(amount_in)
+            .ok_or(ErrorCode::ArithmeticError)?;
+        
+        require!(
+            profit >= ctx.accounts.swap_state.profit_threshold,
+            ErrorCode::InsufficientProfit
+        );
+
         Ok(())
     }
 
-    pub fn raydium_swap<'info>(
-        ctx: Context<'_, '_, '_, 'info, RaydiumSwap<'info>>,
+    // Multi-DEX Arbitrage (Orca -> Whirlpool -> Orca)
+    pub fn execute_orca_whirlpool_arbitrage(
+        ctx: Context<OrcaWhirlpoolArbitrage>,
         amount_in: u64,
-        minimum_amount_out: u64
+        minimum_amount_1: u64,
+        minimum_final_amount: u64,
     ) -> Result<()> {
-        let amount_in = prepare_swap(&ctx.accounts.swap_state)?;
-        _raydium_swap(&ctx, amount_in, minimum_amount_out)?;
-        end_swap(&mut ctx.accounts.swap_state, &mut ctx.accounts.user_destination_token_account)?;
-        Ok(())
-    }
+        // First Orca swap
+        _orca_swap(
+            &ctx.accounts.orca_accounts_1,
+            amount_in,
+            minimum_amount_1,
+        )?;
 
-    pub fn meteora_swap<'info>(
-        ctx: Context<'_, '_, '_, 'info, MeteoraSwap<'info>>,
-        amount_in: u64,
-        minimum_amount_out: u64
-    ) -> Result<()> {
-        let amount_in = prepare_swap(&ctx.accounts.swap_state)?;
-        _meteora_swap(&ctx, amount_in, minimum_amount_out)?;
-        end_swap(&mut ctx.accounts.swap_state, &mut ctx.accounts.user_output_token_account)?;
-        Ok(())
-    }
+        // Whirlpool swap
+        _orca_swap(
+            &ctx.accounts.whirlpool_accounts,
+            minimum_amount_1,
+            minimum_final_amount,
+        )?;
 
-    pub fn jupiter_swap<'info>(
-        ctx: Context<'_, '_, '_, 'info, JupiterSwap<'info>>,
-        amount_in: u64,
-        minimum_amount_out: u64
-    ) -> Result<()> {
-        let amount_in = prepare_swap(&ctx.accounts.swap_state)?;
-        _jupiter_swap(&ctx, amount_in, minimum_amount_out)?;
-        end_swap(&mut ctx.accounts.swap_state, &mut ctx.accounts.user_destination_token)?;
+        // Verify profit
+        let profit = minimum_final_amount.checked_sub(amount_in)
+            .ok_or(ErrorCode::ArithmeticError)?;
+        
+        require!(
+            profit >= ctx.accounts.swap_state.profit_threshold,
+            ErrorCode::InsufficientProfit
+        );
+
         Ok(())
     }
 }
 
 #[derive(Accounts)]
-#[instruction(bump: u8)]
-pub struct InitSwapState<'info> {
+pub struct Initialize<'info> {
+    #[account(mut)]
+    pub owner: Signer<'info>,
     #[account(
         init,
-        payer = payer,
-        space = 8 + SwapState::LEN,
+        payer = owner,
+        space = 8 + 32 + 8 + 8,
         seeds = [b"swap_state"],
         bump
     )]
     pub swap_state: Account<'info, SwapState>,
-    #[account(mut)]
-    pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
-pub struct TokenAndSwapState<'info> {
-    pub src: Account<'info, TokenAccount>,
-    #[account(mut, seeds=[b"swap_state"], bump)]
+pub struct TwoHopArbitrage<'info> {
+    pub user: Signer<'info>,
+    #[account(mut)]
     pub swap_state: Account<'info, SwapState>,
+    pub meteora_accounts: MeteoraSwap<'info>,
+    pub raydium_accounts: RaydiumSwap<'info>,
+    pub token_program: Program<'info, Token>,
 }
 
 #[derive(Accounts)]
-pub struct ExecuteArbitrage<'info> {
+pub struct TriangleArbitrage<'info> {
+    pub user: Signer<'info>,
     #[account(mut)]
     pub swap_state: Account<'info, SwapState>,
-    pub orca: OrcaSwap<'info>,
-    pub raydium: RaydiumSwap<'info>,
-    pub meteora: MeteoraSwap<'info>,
-    pub jupiter: JupiterSwap<'info>,
+    pub meteora_accounts_1: MeteoraSwap<'info>,
+    pub meteora_accounts_2: MeteoraSwap<'info>,
+    pub raydium_accounts: RaydiumSwap<'info>,
+    pub token_program: Program<'info, Token>,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq)]
-pub enum ArbitrageStep {
-    Orca(u64, u64),
-    Raydium(u64, u64),
-    Meteora(u64, u64),
-    Jupiter(u64, u64),
+#[derive(Accounts)]
+pub struct OrcaWhirlpoolArbitrage<'info> {
+    pub user: Signer<'info>,
+    #[account(mut)]
+    pub swap_state: Account<'info, SwapState>,
+    pub orca_accounts_1: OrcaSwap<'info>,
+    pub whirlpool_accounts: OrcaSwap<'info>,
+    pub token_program: Program<'info, Token>,
 }
 
-impl ArbitrageStep {
-    fn get_output_token(&self) -> Pubkey {
-        // Implementation would return the output token for each DEX step
-        // This is a placeholder that should be replaced with actual token addresses
-        Pubkey::default()
-    }
+#[account]
+pub struct SwapState {
+    pub owner: Pubkey,
+    pub profit_threshold: u64,
+    pub active_routes: u64,
 }
 
-// Helper functions
-pub fn prepare_swap(swap_state: &Account<SwapState>) -> Result<u64> {
-    require!(swap_state.is_valid, ErrorCode::InvalidState);
-    let amount_in = swap_state.swap_input;
-    msg!("swap amount in: {:?} for token: {:?}", amount_in, swap_state.current_token);
-    Ok(amount_in)
-}
-
-pub fn end_swap(
-    swap_state: &mut Account<SwapState>,
-    user_dst: &mut Account<TokenAccount>
-) -> Result<()> {
-    let dst_start_balance = user_dst.amount;
-    user_dst.reload()?;
-    let dst_end_balance = user_dst.amount;
-    let swap_amount_out = dst_end_balance.saturating_sub(dst_start_balance);
-    msg!(
-        "swap amount out: {:?} for token: {:?}", 
-        swap_amount_out, 
-        swap_state.current_token
-    );
-    swap_state.swap_input = swap_amount_out;
-    Ok(())
-}
-
-pub fn calculate_fees(step: &ArbitrageStep, amount: u64) -> u64 {
-    match step {
-        ArbitrageStep::Orca(_, _) => amount * 30 / 10000,  // 0.3% fee
-        ArbitrageStep::Raydium(_, _) => amount * 25 / 10000, // 0.25% fee
-        ArbitrageStep::Meteora(_, _) => amount * 20 / 10000, // 0.2% fee
-        ArbitrageStep::Jupiter(_, _) => amount * 10 / 10000, // 0.1% fee
-    }
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Insufficient profit margin")]
+    InsufficientProfit,
+    #[msg("Arithmetic error")]
+    ArithmeticError,
+    #[msg("Slippage tolerance exceeded")]
+    SlippageExceeded,
 }
