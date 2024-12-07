@@ -1,0 +1,34 @@
+[package]
+name = "whirlpool-cpi"
+version = "0.1.1"
+authors = ["Developer Advocate from Orca"]
+description = "CPI Adapter for Orca Whirlpool"
+edition = "2021"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "whirlpool_cpi"
+
+[features]
+# build for CPI
+default = ["cpi"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+
+[dependencies]
+anchor-lang = "=0.26.0"
+anchor-spl = "=0.26.0"
+
+# MSRV related constraints (solana 1.14 uses Rust 1.62.0-dev)
+# https://github.com/solana-labs/solana/issues/31960#issuecomment-1668682153
+solana-program = ">=1.13.5, <1.15"
+regex = "=1.7.1"
+proc-macro-crate = "=1.2.1"
+jobserver = "=0.1.25"
+
+# unpack TickArray
+bincode = "1.3.3"
+default-boxed = "0.2.0"

@@ -1,0 +1,40 @@
+[package]
+name = "whirlpool-cpi"
+version = "0.1.1"
+authors = ["Developer Advocate from Orca"]
+description = "CPI Adapter for Orca Whirlpool"
+edition = "2021"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "whirlpool_cpi"
+
+[features]
+# build for CPI
+default = ["cpi"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+
+[dependencies]
+anchor-lang = "=0.25.0"
+anchor-spl = "=0.25.0"
+
+solana-program = "~1.10.29"
+blake3 = "=1.3.1"
+regex = "=1.6.0"
+memchr = "=2.5.0"
+# 0.7.6 have been yanked
+# https://crates.io/crates/ahash/0.7.6
+ahash = { git = "https://github.com/tkaitchuck/ahash", tag = "v0.7.6" }
+once_cell = "=1.8.0"
+
+# MSRV related constraints (solana 1.10 uses Rust 1.59.0-dev)
+log = "=0.4.17"
+
+# unpack TickArray
+bincode = "1.3.3"
+default-boxed = "0.2.0"
+

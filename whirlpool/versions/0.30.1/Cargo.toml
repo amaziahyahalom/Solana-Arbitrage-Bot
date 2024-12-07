@@ -1,0 +1,26 @@
+[package]
+name = "whirlpool-cpi"
+version = "0.1.2"
+authors = ["Developer Advocate from Orca"]
+description = "CPI Adapter for Orca Whirlpool"
+edition = "2021"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "whirlpool_cpi"
+
+[features]
+# build for CPI
+default = ["cpi"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+
+[dependencies]
+anchor-lang = "=0.30.1"
+
+# unpack TickArray
+bincode = "1"
+default-boxed = "0.2.0"
