@@ -1,7 +1,64 @@
 # ✨[📞💻](https://t.me/blockchainDeveloper_Ben)
 
-
 # Solana Arbitrage Bot Architecture
+
+# Important Update (2024)
+
+## Changes in Orca Whirlpool Protocol
+
+The original implementation was based on an older version of Orca's Whirlpool protocol. Since then, significant changes have been made:
+
+1. **Protocol Architecture Changes**
+   - Whirlpool has moved to a new architecture with concentrated liquidity positions
+   - The old constant product pools are being phased out
+   - New CPI (Cross-Program Invocation) interfaces have been introduced
+
+2. **Integration Requirements**
+   - Integration now requires using the latest Whirlpool CPI crate
+   - Reference: [whirlpool-cpi](https://github.com/orca-so/whirlpool-cpi)
+   - Minimum requirements:
+     ```toml
+     [dependencies]
+     anchor-lang = ">=0.29.0"
+     anchor-spl = ">=0.29.0"
+     whirlpool-cpi = { git = "https://github.com/orca-so/whirlpool-cpi", branch = "anchor/0.29.0" }
+     ```
+
+## On-Chain Arbitrage Limitations
+
+Important note: On-chain arbitrage programs face several limitations and risks:
+
+1. **MEV Competition**
+   - Searchers and validators can front-run transactions
+   - Transaction ordering can be manipulated
+   - Limited control over execution timing
+
+2. **Technical Constraints**
+   - Compute unit limitations for complex calculations
+   - Transaction size limits for multi-hop trades
+   - Higher latency compared to off-chain solutions
+
+3. **Recommended Approach**
+   - Use off-chain arbitrage detection
+   - Submit transactions through MEV-aware RPC providers
+   - Consider integrating with Jito-MEV for better execution
+
+4. **Alternative Architecture**
+   ```mermaid
+   graph TD
+       A[Off-chain Monitor] --> B[Price Analysis]
+       B --> C[Opportunity Detection]
+       C --> D[Transaction Builder]
+       D --> E[MEV-aware RPC]
+       E --> F[Validator Network]
+   ```
+
+The original implementation should be considered as educational material rather than a production-ready solution. For real-world arbitrage:
+
+- Use off-chain monitoring and calculations
+- Integrate with MEV-aware infrastructure
+- Consider validator relationships for better transaction placement
+- Implement proper slippage and risk management
 
 ## Overview
 
