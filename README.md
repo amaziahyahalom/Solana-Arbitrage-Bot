@@ -2,28 +2,6 @@
 
 # Solana Arbitrage Bot Architecture
 
-# Important Update (2024)
-
-## Changes in Orca Whirlpool Protocol
-
-The original implementation was based on an older version of Orca's Whirlpool protocol. Since then, significant changes have been made:
-
-1. **Protocol Architecture Changes**
-   - Whirlpool has moved to a new architecture with concentrated liquidity positions
-   - The old constant product pools are being phased out
-   - New CPI (Cross-Program Invocation) interfaces have been introduced
-
-2. **Integration Requirements**
-   - Integration now requires using the latest Whirlpool CPI crate
-   - Reference: [whirlpool-cpi](https://github.com/orca-so/whirlpool-cpi)
-   - Minimum requirements:
-     ```toml
-     [dependencies]
-     anchor-lang = ">=0.29.0"
-     anchor-spl = ">=0.29.0"
-     whirlpool-cpi = { git = "https://github.com/orca-so/whirlpool-cpi", branch = "anchor/0.29.0" }
-     ```
-
 ## On-Chain Arbitrage Limitations
 
 Important note: On-chain arbitrage programs face several limitations and risks:
