@@ -535,7 +535,7 @@ https://www.rapidinnovation.io/post/solana-trading-bot-development-in-2024-a-com
 | **Bundlers**            | Pumpfun Bundler                                      | Multi-wallet bundler                         | [Repo](https://github.com/Kelvin-1013/PumpFun-Bundler)                      |
 |                         | Raydium Bundler                                      | 21+ wallet bundler for Raydium               | [Repo](https://github.com/Kelvin-1013/Raydium-Bundler)                      |
 | **PumpFun Comment Bot** | PumpFun Comment Bot                                  | Automates comments for PumpFun               | [Repo](https://github.com/Kelvin-1013/PumpFun-Comment-Bot)                  |
-| **Arbitrage Bots**     | Arbitrage Bot (Jupiter v6)                           | Arbitrage bot with Jupiter v6                | [Repo](https://github.com/Kelvin-1013/Arbitrage-Jupter-v5-Bot)              |
+| **Arbitrage Bots**     | Arbitrage Bot (Jupiter v6)                           | Arbitrage bot with Jupiter v6                | [Repo](https://github.com/Kelvin-1013/Arbitrage-Jupter-v6-Bot)              |
 | **MemeToken Launchpad** | MemeToken Launchpad                                  | Meme token launchpad on Raydium              | [Repo](https://github.com/Kelvin-1013/Memetoken-Launcher)                   |
 | **Token Freezer**       | Token Freezer                                        | Tool for freezing tokens                     | [Repo](https://github.com/Kelvin-1013/Token-Freezer)                        |
 | **Copy Trading Bot**    | Copy Trading Bot                                     | Automates trades by mirroring wallets        | [Repo](https://github.com/Kelvin-1013/Copy-Trading-Bot)                     |
