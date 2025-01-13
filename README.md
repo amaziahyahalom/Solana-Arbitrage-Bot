@@ -492,7 +492,7 @@ npm install @project-serum/anchor @solana/web3.js @solana/spl-token chai
 # reference 
 
 https://www.rapidinnovation.io/post/solana-trading-bot-development-in-2024-a-comprehensive-guide
- 
+ https://station.jup.ag/docs/projects-and-dexes/integration-guidelines
  https://docs.raydium.io/raydium/protocol/developers/addresses
 
  https://orca-so.gitbook.io/orca-developer-portal/whirlpools/interacting-with-the-protocol/orca-whirlpools-parameters
