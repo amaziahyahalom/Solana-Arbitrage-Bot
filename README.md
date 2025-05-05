@@ -899,6 +899,3 @@ The Whirlpool swap structure is designed to support Orca's concentrated liquidit
 | **Wallet Trackers**     | Wallet Trackers                                      | Track and monitor crypto wallets             | [Repo](https://github.com/amaziahyahalom/wallet-trackers)                        |
 
 </div>
-
- https://solscan.io/account/benRLpb...WGbEUm
- 
