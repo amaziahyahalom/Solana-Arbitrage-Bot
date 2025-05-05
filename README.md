@@ -46,10 +46,7 @@ If you have any questions, feel free to reach out:
 
 - **GitHub Issues**: Open an issue in this repo
 - **Email**: amaziaytower@gmail.com
-- **Telegram**: [@HP319193](https://t.me/amazia_AI)
-- **GitHub**: [amaziatower](https://github.com/amaziatower/)
-
+- **Telegram**: [@amazia_AI](https://t.me/amazia_AI)
 ---
-
 > _Disclaimer: Use this bot at your own risk. Trading cryptocurrencies carries financial risk, and past performance is not indicative of future results._
 
