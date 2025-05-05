@@ -1,7 +1,4 @@
-# Solana Arbitrage Bot
-> **A high-performance arbitrage bot for Solana decentralized exchanges (DEXs).**
----
-[📞📞📞](@amazia_AI)
+# Solana Arbitrage Bot  [📞](@amazia_AI)
 ## 🚀 Overview
 This Solana Arbitrage Bot monitors multiple decentralized exchanges on the Solana blockchain to identify and exploit profitable arbitrage opportunities. It leverages the speed and efficiency of Solana to execute trades with minimal latency.
 ---
